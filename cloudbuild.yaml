@@ -5,7 +5,7 @@
 
 
   steps:
-  - name: gcr.io/k8s-skaffold/pack
+  - name: gcr.io/buildpacks/builder
     entrypoint: pack
     args:
     - build
