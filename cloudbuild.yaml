@@ -1,0 +1,32 @@
+  options:
+    logging: CLOUD_LOGGING_ONLY
+    pool: {}
+  projectId: previewbuild
+
+
+  steps:
+  - name: gcr.io/k8s-skaffold/pack
+    entrypoint: pack
+    args:
+    - build
+    - global
+
+-docker.pkg.dev/previewbuild
+
+/REPO_NAME
+
+/IMAGE_NAME
+
+
+    - --builder
+    - gcr.io/buildpacks/builder:latest
+    - --network
+    - cloudbuild
+  images:
+  - global
+
+-docker.pkg.dev/previewbuild
+
+/rechandler/previewbuild
+
+/gcr.io/previewbuild/github.com/rechandler/previewbuild:$COMMIT_SHA
