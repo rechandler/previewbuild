@@ -6,7 +6,7 @@
 
   steps:
   - name: gcr.io/buildpacks/builder
-    entrypoint: /
+    entrypoint: pack
     args:
     - build
     - global
