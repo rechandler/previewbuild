@@ -16,3 +16,16 @@
 /rechandler/previewbuild
 
 /gcr.io/previewbuild/github.com/rechandler/previewbuild:$COMMIT_SHA
+
+    - --builder
+    - gcr.io/buildpacks/builder:latest
+    - --network
+    - cloudbuild
+  images:
+  - global
+
+-docker.pkg.dev/previewbuild
+
+/rechandler/previewbuild
+
+/gcr.io/previewbuild/github.com/rechandler/previewbuild:$COMMIT_SHA
