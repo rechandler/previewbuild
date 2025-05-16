@@ -1,24 +1,18 @@
-  options:
-    logging: CLOUD_LOGGING_ONLY
-    pool: {}
-  projectId: previewbuild
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool: {}
+projectId: previewbuild
 
-
-  steps:
+steps:
   - name: gcr.io/buildpacks/builder
     entrypoint: pack
     args:
-    - build
-    - global
-    - --builder
-    - gcr.io/buildpacks/builder:latest
-    - --network
-    - cloudbuild
-  images:
-  - global
+      - build
+      - ${_IMAGE_NAME}
+      - --builder
+      - gcr.io/buildpacks/builder:latest
+      - --network
+      - cloudbuild
 
--docker.pkg.dev/previewbuild
-
-/rechandler/previewbuild
-
-/gcr.io/previewbuild/github.com/rechandler/previewbuild:$COMMIT_SHA
+images:
+  - "gcr.io/previewbuild/${_IMAGE_NAME}:$COMMIT_SHA"
