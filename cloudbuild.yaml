@@ -55,7 +55,7 @@ steps:
             -H "Authorization: Bearer $$GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/rechandler/previewbuild/pulls/$_PR_NUMBER/comments \
+            https://api.github.com/repos/rechandler/previewbuild/issues/$_PR_NUMBER/comments \
             -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $$CLOUD_RUN_URL\"}"
         else
           echo "Not a PR build, skipping GitHub comment"
