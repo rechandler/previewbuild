@@ -13,5 +13,19 @@ steps:
       - --network
       - cloudbuild
 
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "previewbuild"
+      - "--image"
+      - "gcr.io/previewbuild/previewbuild:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+
 images:
   - "gcr.io/previewbuild/previewbuild:$COMMIT_SHA"
