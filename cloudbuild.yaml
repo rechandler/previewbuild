@@ -44,7 +44,7 @@ substitutions:
 
 # Define the steps for the build process
 steps:
-  - name: "Build Image"
+  - name: "gcr.io/buildpacks/builder:latest"
     dir: "."
     args:
       [
