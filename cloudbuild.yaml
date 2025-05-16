@@ -1,0 +1,99 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool: {}
+
+projectId: previewbuild
+steps:
+  #build the container
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest",
+        ".",
+        "-f",
+        "Dockerfile",
+      ]
+
+  #push the container to the container registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app"]
+
+  #deploy the container to the cloud run service
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "my-app",
+        "--image",
+        "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest",
+        "--region",
+        "us-central1",
+        "--allow-unauthenticated",
+        "--port",
+        "80",
+      ]
+    id: deploy
+
+  # Post Cloud Run URL to GitHub PR
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Install jq
+        apt-get update -y && apt-get install -y jq
+
+        # Get the Cloud Run URL
+        CLOUD_RUN_URL=$$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
+        # Echo variables for debugging
+        echo "Cloud Run URL: $$CLOUD_RUN_URL"
+
+        # Check for existing comments on the PR
+        if [ -n "$_PR_NUMBER" ]; then
+          EXISTING_COMMENTS=$$(curl -s \
+            -H "Authorization: Bearer $$GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/rechandler/previewbuild/issues/$_PR_NUMBER/comments)
+          
+          # Check if any comment contains our deployment message
+          if echo "$$EXISTING_COMMENTS" | grep -q "Preview deployment is ready!"; then
+            echo "Found existing preview deployment comment"
+            # Delete existing preview deployment comment
+            COMMENT_ID=$$(echo "$$EXISTING_COMMENTS" | jq -r '.[] | select(.body | contains("Preview deployment is ready!")) | .id')
+            curl -X DELETE \
+              -H "Authorization: Bearer $$GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/rechandler/previewbuild/issues/comments/$$COMMENT_ID
+            echo "Deleted existing preview deployment comment"
+          fi
+        fi
+
+        # Only run if PR_NUMBER is available
+        if [ -n "$_PR_NUMBER" ]; then
+          # Post comment to GitHub PR
+          curl -X POST \
+            -H "Authorization: Bearer $$GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/rechandler/previewbuild/issues/$_PR_NUMBER/comments \
+            -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $$CLOUD_RUN_URL\"}"
+        else
+          echo "Not a PR build, skipping GitHub comment"
+        fi
+    secretEnv: ["GITHUB_TOKEN"]
+    waitFor: ["deploy"] # Wait for deployment to complete
+
+images:
+  - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
+
+# Secret for GitHub token
+availableSecrets:
+  secretManager:
+    - versionName: projects/previewbuild/secrets/github_token/versions/latest
+      env: "GITHUB_TOKEN"
