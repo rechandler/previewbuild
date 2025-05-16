@@ -12,5 +12,18 @@ steps:
       - gcr.io/buildpacks/builder:latest
       - --network
       - cloudbuild
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "my-app",
+        "--image",
+        "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest",
+        "--region",
+        "us-central1",
+        "--allow-unauthenticated",
+      ]
 images:
   - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
