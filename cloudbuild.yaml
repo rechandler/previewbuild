@@ -11,7 +11,6 @@ steps:
         "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest",
         ".",
       ]
-    images: ["us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest"]
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "gcloud"
     args:
