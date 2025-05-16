@@ -47,11 +47,6 @@ steps:
         CLOUD_RUN_URL=$$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
         # Echo variables for debugging
         echo "Cloud Run URL: $$CLOUD_RUN_URL"
-        echo "PR Number: $_PR_NUMBER" 
-        echo "GitHub Owner: $_GITHUB_OWNER"
-        echo "GitHub Repo: $_GITHUB_REPO"
-
-
 
         # Only run if PR_NUMBER is available
         if [ -n "$_PR_NUMBER" ]; then
@@ -60,7 +55,7 @@ steps:
             -H "Authorization: Bearer $$GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/$_GITHUB_OWNER/$_GITHUB_REPO/pulls/$_PR_NUMBER/comments \
+            https://api.github.com/repos/rechandler/previewbuild/pulls/$_PR_NUMBER/comments \
             -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $$CLOUD_RUN_URL\"}"
         else
           echo "Not a PR build, skipping GitHub comment"
