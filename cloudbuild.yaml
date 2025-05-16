@@ -10,7 +10,13 @@ steps:
         "-t",
         "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app:latest",
         ".",
+        "-f",
+        "Dockerfile",
       ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app"]
+
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "gcloud"
     args:
