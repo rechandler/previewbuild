@@ -1,55 +1,76 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
-  pool: {}
-projectId: previewbuild
+# options:
+#   logging: CLOUD_LOGGING_ONLY
+#   pool: {}
+# projectId: previewbuild
 
+# steps:
+#   - name: gcr.io/k8s-skaffold/pack
+#     args:
+#       - build
+#       - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
+#       - --builder
+#       - gcr.io/buildpacks/builder:latest
+#       - --network
+#       - cloudbuild
+
+#   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+#     entrypoint: gcloud
+#     args:
+#       - "run"
+#       - "deploy"
+#       - "previewbuild"
+#       - "--image"
+#       - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
+#       - "--region"
+#       - "us-central1"
+#       - "--platform"
+#       - "managed"
+#       - "--allow-unauthenticated"
+
+# images:
+#   - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
+
+# cloudbuild.yaml
+# This Cloud Build configuration builds an image using Buildpacks and deploys it to Cloud Run
+# for preview builds on pull requests.
+
+# Define the base image for the application
+substitutions:
+  _IMAGE_TAG: "latest"
+  _SERVICE_NAME: "my-app-preview"
+  _REGION: "us-central1" # Replace with your desired region
+  _PROJECT_ID: "previewbuild" # Replace with your project ID
+  _ARTIFACT_REGISTRY_REPOSITORY: "ryann-repo" # Replace with your repository
+
+# Define the steps for the build process
 steps:
-  - name: gcr.io/k8s-skaffold/pack
+  - name: "gcr.io/buildpacks/builder:latest" # or your preferred builder
+    # Replace with the path to your source code
+    dir: "."
     args:
-      - build
-      - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
-      - --builder
-      - gcr.io/buildpacks/builder:latest
-      - --network
-      - cloudbuild
-
-  # Extract build artifacts from the image
-  - name: "gcr.io/cloud-builders/docker"
-    entrypoint: "bash"
+      [
+        "build",
+        "--builder",
+        "gcr.io/buildpacks/builder:latest",
+        "--image",
+        "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
+        "--env",
+        "GOOGLE_FUNCTION_TARGET=myFunction",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"ß
+    entrypoint: "gcloud"
     args:
-      - "-c"
-      - |
-        # Create a temporary container
-        CONTAINER_ID=$(docker create gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA)
-        # Create artifacts directory
-        mkdir -p /workspace/artifacts
-        # Copy build artifacts from the container
-        docker cp $CONTAINER_ID:/workspace/dist /workspace/artifacts/
-        # Remove the temporary container
-        docker rm $CONTAINER_ID
+      [
+        "run",
+        "deploy",
+        "${_SERVICE_NAME}",
+        "--image",
+        "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
+        "--region",
+        "${_REGION}",
+        "--allow-unauthenticated",
+      ]
 
-  # Upload artifacts to Google Cloud Storage
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    args:
-      - "gsutil"
-      - "cp"
-      - "-r"
-      - "/workspace/artifacts"
-      - "gs://$PROJECT_ID-artifacts/$COMMIT_SHA/"
-
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: gcloud
-    args:
-      - "run"
-      - "deploy"
-      - "previewbuild"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
-      - "--region"
-      - "us-central1"
-      - "--platform"
-      - "managed"
-      - "--allow-unauthenticated"
-
+# Optional: Define the images to be pushed to Artifact Registry
 images:
-  - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
+  - "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}"
