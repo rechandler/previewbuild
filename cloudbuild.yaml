@@ -3,6 +3,7 @@ options:
   pool: {}
 projectId: previewbuild
 steps:
+  #build the container
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
@@ -14,9 +15,11 @@ steps:
         "Dockerfile",
       ]
 
+  #push the container to the container registry
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app"]
 
+  #deploy the container to the cloud run service
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "gcloud"
     args:
@@ -44,12 +47,12 @@ steps:
         CLOUD_RUN_URL=$$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
 
         # Only run if PR_NUMBER is available
-        if [ -n "$$_PR_NUMBER" ]; then
+        if [ -n "$_PR_NUMBER" ]; then
           # Post comment to GitHub PR
           curl -X POST \
             -H "Authorization: token $$GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/$$_GITHUB_OWNER/$$_GITHUB_REPO/issues/$$_PR_NUMBER/comments \
+            https://api.github.com/repos/$_GITHUB_OWNER/$_GITHUB_REPO/issues/$_PR_NUMBER/comments \
             -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $$CLOUD_RUN_URL\"}"
         else
           echo "Not a PR build, skipping GitHub comment"
