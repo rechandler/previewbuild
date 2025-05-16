@@ -57,7 +57,7 @@ steps:
         "--env",
         "GOOGLE_FUNCTION_TARGET=myFunction",
       ]
-  - name: "gcr.io/cloud-builders/gcloud"ß
+  - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "gcloud"
     args:
       [
