@@ -32,5 +32,36 @@ steps:
         "--port",
         "80",
       ]
+    id: deploy
+
+  # Post Cloud Run URL to GitHub PR
+  - name: "gcr.io/cloud-builders/curl"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Get the Cloud Run URL
+        CLOUD_RUN_URL=$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
+
+        # Only run if PR_NUMBER is available
+        if [ -n "$_PR_NUMBER" ]; then
+          # Post comment to GitHub PR
+          curl -X POST \
+            -H "Authorization: token $$GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$_GITHUB_OWNER/$_GITHUB_REPO/issues/$_PR_NUMBER/comments \
+            -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $CLOUD_RUN_URL\"}"
+        else
+          echo "Not a PR build, skipping GitHub comment"
+        fi
+    secretEnv: ["GITHUB_TOKEN"]
+    waitFor: ["deploy"] # Wait for deployment to complete
+
 images:
   - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
+
+# Secret for GitHub token
+availableSecrets:
+  secretManager:
+    - versionName: projects/previewbuild/secrets/github_token/versions/latest
+      env: "GITHUB_TOKEN"
