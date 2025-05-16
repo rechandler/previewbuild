@@ -50,9 +50,10 @@ steps:
         if [ -n "$_PR_NUMBER" ]; then
           # Post comment to GitHub PR
           curl -X POST \
-            -H "Authorization: token $$GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/$_GITHUB_OWNER/$_GITHUB_REPO/issues/$_PR_NUMBER/comments \
+            -H "Authorization: Bearer $$GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/$_GITHUB_OWNER/$_GITHUB_REPO/pulls/$_PR_NUMBER/comments \
             -d "{\"body\":\"🚀 Preview deployment is ready! You can view it at: $$CLOUD_RUN_URL\"}"
         else
           echo "Not a PR build, skipping GitHub comment"
