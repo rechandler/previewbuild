@@ -4,15 +4,24 @@ options:
 projectId: previewbuild
 
 steps:
-  - name: gcr.io/k8s-skaffold/pack
-    args:
-      - build
-      - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
-      - --builder
-      - gcr.io/buildpacks/builder:latest
-      - --network
-      - cloudbuild
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA", "."]
 
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"]
+
+  # Verify image exists
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        echo "Verifying image exists..."
+        gcloud container images describe gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
+
+  # Deploy container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -29,3 +38,5 @@ steps:
 
 images:
   - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
+
+timeout: "1800s"
