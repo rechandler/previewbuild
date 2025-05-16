@@ -44,27 +44,16 @@ substitutions:
 
 # Define the steps for the build process
 steps:
-  # - name: "gcr.io/buildpacks/builder:latest" # or your preferred builder
-  #   # Replace with the path to your source code
-  #   dir: "."
-  #   args:
-  #     [
-  #       "build",
-  #       "--builder",
-  #       "gcr.io/buildpacks/builder:latest",
-  #       "--image",
-  #       "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
-  #       "--env",
-  #       "GOOGLE_FUNCTION_TARGET=myFunction",
-  #     ]
-  - name: gcr.io/k8s-skaffold/pack
+  - name: "Build Image"
+    dir: "."
     args:
-      - build
-      - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
-      - --builder
-      - gcr.io/buildpacks/builder:latest
-      - --network
-      - cloudbuild
+      [
+        "build",
+        "--builder",
+        "gcr.io/buildpacks/builder:latest",
+        "--image",
+        "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
+      ]
 
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "gcloud"
