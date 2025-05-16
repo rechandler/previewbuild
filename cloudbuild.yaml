@@ -44,6 +44,9 @@ steps:
     args:
       - -c
       - |
+        # Install jq
+        apt-get update -y && apt-get install -y jq
+
         # Get the Cloud Run URL
         CLOUD_RUN_URL=$$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
         # Echo variables for debugging
