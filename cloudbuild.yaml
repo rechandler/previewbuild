@@ -4,8 +4,7 @@ options:
 projectId: previewbuild
 
 steps:
-  - name: gcr.io/buildpacks/builder
-    entrypoint: pack
+  - name: gcr.io/k8s-skaffold/pack
     args:
       - build
       - ${_IMAGE_NAME}
