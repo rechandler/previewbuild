@@ -63,8 +63,6 @@ steps:
       - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
       - --builder
       - gcr.io/buildpacks/builder:latest
-      - --image
-      - "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}"
       - --network
       - cloudbuild
 
