@@ -1,74 +1,16 @@
 options:
   logging: CLOUD_LOGGING_ONLY
   pool: {}
-# projectId: previewbuild
-
-# steps:
-#   - name: gcr.io/k8s-skaffold/pack
-#     args:
-#       - build
-#       - gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA
-#       - --builder
-#       - gcr.io/buildpacks/builder:latest
-#       - --network
-#       - cloudbuild
-
-#   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-#     entrypoint: gcloud
-#     args:
-#       - "run"
-#       - "deploy"
-#       - "previewbuild"
-#       - "--image"
-#       - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
-#       - "--region"
-#       - "us-central1"
-#       - "--platform"
-#       - "managed"
-#       - "--allow-unauthenticated"
-
-# images:
-#   - "gcr.io/$PROJECT_ID/previewbuild:$COMMIT_SHA"
-
-# cloudbuild.yaml
-# This Cloud Build configuration builds an image using Buildpacks and deploys it to Cloud Run
-# for preview builds on pull requests.
-
-# Define the base image for the application
-substitutions:
-  _IMAGE_TAG: "latest"
-  _SERVICE_NAME: "my-app-preview"
-  _REGION: "us-central1" # Replace with your desired region
-  _PROJECT_ID: "previewbuild" # Replace with your project ID
-  _ARTIFACT_REGISTRY_REPOSITORY: "ryann-repo" # Replace with your repository
-
-# Define the steps for the build process
+projectId: previewbuild
 steps:
-  - name: "gcr.io/buildpacks/builder:latest"
-    dir: "."
+  - name: gcr.io/k8s-skaffold/pack
+    entrypoint: pack
     args:
-      [
-        "build",
-        "--builder",
-        "gcr.io/buildpacks/builder:latest",
-        "--image",
-        "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
-      ]
-
-  - name: "gcr.io/cloud-builders/gcloud"
-    entrypoint: "gcloud"
-    args:
-      [
-        "run",
-        "deploy",
-        "${_SERVICE_NAME}",
-        "--image",
-        "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}",
-        "--region",
-        "${_REGION}",
-        "--allow-unauthenticated",
-      ]
-
-# Optional: Define the images to be pushed to Artifact Registry
+      - build
+      - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
+      - --builder
+      - gcr.io/buildpacks/builder:latest
+      - --network
+      - cloudbuild
 images:
-  - "gcr.io/${_PROJECT_ID}/$_ARTIFACT_REGISTRY_REPOSITORY/my-app:${_IMAGE_TAG}"
+  - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
