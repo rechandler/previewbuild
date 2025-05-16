@@ -7,11 +7,11 @@ steps:
   - name: gcr.io/k8s-skaffold/pack
     args:
       - build
-      - ${_IMAGE_NAME}
+      - previewbuild
       - --builder
       - gcr.io/buildpacks/builder:latest
       - --network
       - cloudbuild
 
 images:
-  - "gcr.io/previewbuild/${_IMAGE_NAME}:$COMMIT_SHA"
+  - "gcr.io/previewbuild/previewbuild:$COMMIT_SHA"
