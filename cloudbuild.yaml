@@ -1,6 +1,6 @@
-# options:
-#   logging: CLOUD_LOGGING_ONLY
-#   pool: {}
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool: {}
 # projectId: previewbuild
 
 # steps:
