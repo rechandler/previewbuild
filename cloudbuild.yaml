@@ -30,7 +30,7 @@ steps:
         "us-central1",
         "--allow-unauthenticated",
         "--port",
-        "8080",
+        "80",
       ]
 images:
   - us-central1-docker.pkg.dev/previewbuild/ryann-repo/my-app
