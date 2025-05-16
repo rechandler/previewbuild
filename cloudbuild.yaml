@@ -7,7 +7,7 @@ steps:
   - name: gcr.io/k8s-skaffold/pack
     args:
       - build
-      - previewbuild
+      - gcr.io/previewbuild/previewbuild:$COMMIT_SHA
       - --builder
       - gcr.io/buildpacks/builder:latest
       - --network
