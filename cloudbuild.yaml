@@ -35,7 +35,7 @@ steps:
     id: deploy
 
   # Post Cloud Run URL to GitHub PR
-  - name: "gcr.io/cloud-builders/curl"
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: bash
     args:
       - -c
