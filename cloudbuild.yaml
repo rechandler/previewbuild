@@ -45,6 +45,13 @@ steps:
       - |
         # Get the Cloud Run URL
         CLOUD_RUN_URL=$$(gcloud run services describe my-app --region us-central1 --format='value(status.url)')
+        # Echo variables for debugging
+        echo "Cloud Run URL: $$CLOUD_RUN_URL"
+        echo "PR Number: $_PR_NUMBER" 
+        echo "GitHub Owner: $_GITHUB_OWNER"
+        echo "GitHub Repo: $_GITHUB_REPO"
+
+
 
         # Only run if PR_NUMBER is available
         if [ -n "$_PR_NUMBER" ]; then
