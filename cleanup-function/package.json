@@ -1,0 +1,12 @@
+{
+  "name": "preview-cleanup-function",
+  "version": "1.0.0",
+  "description": "Cloud Function to clean up preview environments when PRs are closed",
+  "main": "index.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
+  }
+}
