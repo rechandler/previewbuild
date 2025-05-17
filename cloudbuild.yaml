@@ -39,8 +39,6 @@ steps:
         "--allow-unauthenticated",
         "--port",
         "80",
-        "--labels"
-        "pr=$_PR_NUMBER,commit=$SHORT_SHA",
       ]
     id: deploy
 
