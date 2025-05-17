@@ -39,14 +39,8 @@ steps:
         "--allow-unauthenticated",
         "--port",
         "80",
-        "--labels=pr=$_PR_NUMBER,commit=$SHORT_SHA",
-        "--service-account=preview-builds@previewbuild.iam.gserviceaccount.com",
-        "--memory=512Mi",
-        "--cpu=1",
-        "--concurrency=80",
-        "--min-instances=0",
-        "--max-instances=1",
-        "--set-env-vars=PR_NUMBER=$_PR_NUMBER,COMMIT_SHA=$SHORT_SHA",
+        "--labels"
+        "pr=$_PR_NUMBER,commit=$SHORT_SHA",
       ]
     id: deploy
 
