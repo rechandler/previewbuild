@@ -1,3 +1,6 @@
+# NOTE: This Dockerfile is no longer used with the Google Cloud Storage approach.
+# It remains here for reference purposes only.
+
 FROM node:22 as build
 
 WORKDIR /app

@@ -1,61 +1,43 @@
-# Preview Environment Cleanup Function
+# Cleanup Function for PR Preview Environments
 
-This Cloud Function automatically cleans up PR preview environments when a pull request is closed or merged.
+This Cloud Function automatically cleans up preview environments when a PR is closed or merged.
 
-## Deployment Steps
+## What It Does
 
-1. First, set up the required secrets:
+When a PR is closed or merged, this function:
 
-```bash
-# Create a secret for the GitHub webhook
-gcloud secrets create github-webhook-secret --replication-policy="automatic"
-echo -n "YOUR_GITHUB_WEBHOOK_SECRET" | gcloud secrets versions add github-webhook-secret --data-file=-
+1. Receives a webhook from GitHub
+2. Verifies the webhook signature for security
+3. Empties and deletes the Google Cloud Storage bucket associated with the PR
+4. Posts a comment to the PR confirming the cleanup
 
-# Create a service account for the cleanup function
-gcloud iam service-accounts create preview-cleanup-function
+## Deployment
 
-# Grant permissions to the service account
-gcloud projects add-iam-policy-binding previewbuild \
-  --member="serviceAccount:preview-cleanup-function@previewbuild.iam.gserviceaccount.com" \
-  --role="roles/run.admin"
-
-gcloud projects add-iam-policy-binding previewbuild \
-  --member="serviceAccount:preview-cleanup-function@previewbuild.iam.gserviceaccount.com" \
-  --role="roles/artifactregistry.admin"
-
-# Grant access to secrets
-gcloud secrets add-iam-policy-binding github-webhook-secret \
-  --member="serviceAccount:preview-cleanup-function@previewbuild.iam.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
-
-gcloud secrets add-iam-policy-binding github_token \
-  --member="serviceAccount:preview-cleanup-function@previewbuild.iam.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
-```
-
-2. Deploy the Cloud Function:
+To deploy this function to Google Cloud Functions:
 
 ```bash
-gcloud functions deploy preview-cleanup-function \
-  --gen2 \
-  --runtime=nodejs16 \
-  --region=us-central1 \
-  --source=. \
-  --entry-point=cleanupPreviewEnvironment \
+gcloud functions deploy cleanup-preview-environment \
+  --runtime nodejs20 \
   --trigger-http \
-  --service-account=preview-cleanup-function@previewbuild.iam.gserviceaccount.com \
-  --set-secrets=GITHUB_WEBHOOK_SECRET=github-webhook-secret:latest,GITHUB_TOKEN=github_token:latest \
-  --allow-unauthenticated
+  --allow-unauthenticated \
+  --set-env-vars GITHUB_WEBHOOK_SECRET=your_secret,GITHUB_TOKEN=your_github_token
 ```
 
-3. Set up a GitHub webhook:
+## Setting Up the GitHub Webhook
 
-- Go to your GitHub repository settings
-- Click on "Webhooks" > "Add webhook"
-- Set the Payload URL to your function's URL (you'll get this after deployment)
-- Set Content type to `application/json`
-- Set the Secret to the same value you used for the webhook secret above
-- Under "Which events would you like to trigger this webhook?", select "Pull requests"
-- Click "Add webhook"
+1. Go to your GitHub repository settings
+2. Navigate to Webhooks > Add webhook
+3. Set the Payload URL to the deployed Cloud Function URL
+4. Set the Content type to `application/json`
+5. Set the Secret to the same value used in the `GITHUB_WEBHOOK_SECRET` environment variable
+6. Select "Let me select individual events" and choose "Pull requests"
+7. Make sure the webhook is active and click "Add webhook"
 
-Now whenever a pull request is closed or merged, the preview environment will be automatically deleted.
+## Environment Variables
+
+- `GITHUB_WEBHOOK_SECRET`: The secret used to verify GitHub webhook signatures
+- `GITHUB_TOKEN`: A GitHub personal access token with repo permissions to post comments
+
+## Local Testing
+
+For local testing, you can use tools like ngrok to expose your local server to the internet and receive GitHub webhooks.
