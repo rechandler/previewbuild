@@ -40,7 +40,7 @@ steps:
 
         # Get the public URL
         PREVIEW_URL="https://storage.googleapis.com/previewbuild-pr-$_PR_NUMBER/index.html"
-        echo "Preview URL: $PREVIEW_URL"
+        echo "Preview URL: $$PREVIEW_URL"
     id: deploy
 
   # Post Storage URL to GitHub PR
@@ -54,7 +54,7 @@ steps:
 
         # Define the preview URL
         PREVIEW_URL="https://storage.googleapis.com/previewbuild-pr-$_PR_NUMBER/index.html"
-        echo "Storage URL for PR #$_PR_NUMBER: $PREVIEW_URL"
+        echo "Storage URL for PR #$_PR_NUMBER: $$PREVIEW_URL"
 
         # Check for existing comments on the PR
         if [ -n "$_PR_NUMBER" ]; then
@@ -84,7 +84,7 @@ steps:
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           https://api.github.com/repos/rechandler/previewbuild/issues/$_PR_NUMBER/comments \
-          -d "{\"body\":\"🚀 Preview deployment for PR #$_PR_NUMBER (Commit: $SHORT_SHA) is ready!\n\n🔗 **Preview URL**: $PREVIEW_URL\n\n_This preview environment will be automatically deleted when the PR is closed._\"}"
+          -d "{\"body\":\"🚀 Preview deployment for PR #$_PR_NUMBER (Commit: $SHORT_SHA) is ready!\n\n🔗 **Preview URL**: $$PREVIEW_URL\n\n_This preview environment will be automatically deleted when the PR is closed._\"}"
     secretEnv: ["GITHUB_TOKEN"]
     waitFor: ["deploy"] # Wait for deployment to complete
 
