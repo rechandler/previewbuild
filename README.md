@@ -1,3 +1,46 @@
+# Preview Build System
+
+This project uses Google Cloud Storage to create static preview builds for each Pull Request. When a PR is opened or updated, a preview environment is automatically created, and a comment with the preview URL is posted to the PR.
+
+## How It Works
+
+1. A GitHub webhook triggers Cloud Build when a PR is created or updated.
+2. Cloud Build:
+
+   - Builds the React application using `npm run build`
+   - Creates a unique Google Cloud Storage bucket for each PR
+   - Uploads the built static files to the bucket
+   - Configures the bucket for website hosting
+   - Posts a comment to the PR with the preview URL
+
+3. When a PR is closed or merged, a Cloud Function is triggered to:
+   - Delete the Google Cloud Storage bucket
+   - Post a comment to the PR confirming the cleanup
+
+## Preview URLs
+
+Preview URLs follow this format:
+
+```
+https://storage.googleapis.com/previewbuild-pr-{PR_NUMBER}/index.html
+```
+
+## Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -24,31 +67,31 @@ export default tseslint.config({
   languageOptions: {
     // other options...
     parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
       tsconfigRootDir: import.meta.dirname,
     },
   },
-})
+});
 ```
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import reactX from "eslint-plugin-react-x";
+import reactDom from "eslint-plugin-react-dom";
 
 export default tseslint.config({
   plugins: {
     // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
+    "react-x": reactX,
+    "react-dom": reactDom,
   },
   rules: {
     // other rules...
     // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
+    ...reactX.configs["recommended-typescript"].rules,
     ...reactDom.configs.recommended.rules,
   },
-})
+});
 ```
