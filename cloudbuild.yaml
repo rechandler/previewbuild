@@ -13,6 +13,8 @@ steps:
   - name: "node:22"
     entrypoint: npm
     args: ["run", "build"]
+    env:
+      - "PR_NUMBER=$_PR_NUMBER"
 
   # Upload to Google Cloud Storage
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
