@@ -3,7 +3,7 @@ const crypto = require("crypto");
 
 /**
  * Handles GitHub webhook events for PR closures.
- * Deletes the corresponding Cloud Run service when a PR is closed.
+ * Deletes the corresponding Google Storage bucket when a PR is closed.
  *
  * @param {Object} req Cloud Function request context.
  * @param {Object} res Cloud Function response context.
@@ -45,32 +45,18 @@ exports.cleanupPreviewEnvironment = async (req, res) => {
       const prNumber = payload.pull_request.number;
       console.log(`Processing PR #${prNumber} ${payload.action} event`);
 
-      // Delete the Cloud Run service
-      const serviceName = `pr-${prNumber}`;
-      console.log(`Deleting Cloud Run service: ${serviceName}`);
+      // Delete the Google Storage bucket
+      const bucketName = `previewbuild-pr-${prNumber}`;
+      console.log(`Deleting Google Storage bucket: ${bucketName}`);
 
       try {
-        execSync(
-          `gcloud run services delete ${serviceName} --region=us-central1 --quiet`
-        );
-        console.log(`Successfully deleted Cloud Run service: ${serviceName}`);
+        // Empty the bucket first (required before deletion)
+        execSync(`gsutil -m rm -r gs://${bucketName}/**`);
+        console.log(`Successfully emptied bucket: ${bucketName}`);
 
-        // Delete the container image
-        const imagePrefix = `us-central1-docker.pkg.dev/previewbuild/ryann-repo/pr-${prNumber}`;
-        console.log(`Deleting container images with prefix: ${imagePrefix}`);
-
-        // List all tags for this image
-        const tagsOutput = execSync(
-          `gcloud container images list-tags ${imagePrefix} --format="value(tags)"`
-        ).toString();
-        const tags = tagsOutput.split("\n").filter(Boolean);
-
-        // Delete each tagged image
-        for (const tag of tags) {
-          const fullImageName = `${imagePrefix}:${tag}`;
-          console.log(`Deleting container image: ${fullImageName}`);
-          execSync(`gcloud container images delete ${fullImageName} --quiet`);
-        }
+        // Delete the bucket
+        execSync(`gsutil rb gs://${bucketName}`);
+        console.log(`Successfully deleted bucket: ${bucketName}`);
 
         // Comment on the PR that the environment has been deleted
         const commentBody = {
