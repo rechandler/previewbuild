@@ -54,12 +54,7 @@ jobs:
             # Copy the built files to the bucket
             gsutil -m cp -r dist/* gs://${{ env.BUCKET_NAME }}/
             # Set the website configuration
-            cat > website.json << EOF
-            {
-                "mainPageSuffix": "index.html",
-                "notFoundPage": "index.html"
-            }
-            EOF
+            echo '{"mainPageSuffix": "index.html", "notFoundPage": "index.html"}' > website.json
             gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
           fi
 
