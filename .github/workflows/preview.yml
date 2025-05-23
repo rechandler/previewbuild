@@ -47,13 +47,17 @@ jobs:
         run: |
           # Create bucket if it doesn't exist
           if ! gsutil ls gs://${{ env.BUCKET_NAME }} 2>/dev/null; then
-            gsutil mb -p ${{ env.PROJECT_ID }} -l us-central1 gs://${{ env.BUCKET_NAME }}
-            gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
+            # Create a bucket for this PR if it doesn't exist
+            gsutil mb -p previewbuild -l us-central1 -b on gs://${{ env.BUCKET_NAME }} || true
+            # Make bucket publicly readable
             gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
+            # Copy the built files to the bucket
+            gsutil -m cp -r dist/* gs://${{ env.BUCKET_NAME }}/
+            # Set the website configuration
             cat > website.json << EOF
             {
-              "mainPageSuffix": "index.html",
-              "notFoundPage": "index.html"
+                "mainPageSuffix": "index.html",
+                "notFoundPage": "index.html"
             }
             EOF
             gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
