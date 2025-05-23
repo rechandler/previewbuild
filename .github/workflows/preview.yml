@@ -67,7 +67,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const previewUrl = `https://storage.googleapis.com/${{ env.BUCKET_NAME }}`;
+            const previewUrl = `https://storage.googleapis.com/${{ env.BUCKET_NAME }}/index.html`;
             const message = `🚀 Preview deployment for PR #${{ github.event.pull_request.number }} is ready!\n\n` +
                           `🔗 **Preview URL**: ${previewUrl}\n\n` +
                           `_This preview environment will be automatically deleted when the PR is closed._`;
