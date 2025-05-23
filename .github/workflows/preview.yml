@@ -50,7 +50,13 @@ jobs:
             gsutil mb -p ${{ env.PROJECT_ID }} -l us-central1 gs://${{ env.BUCKET_NAME }}
             gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
             gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
-            gcloud storage buckets update gs://${{ env.BUCKET_NAME }} --web-main-page-suffix=index.html --web-error-page=index.html
+            cat > website.json << EOF
+            {
+              "mainPageSuffix": "index.html",
+              "notFoundPage": "index.html"
+            }
+            EOF
+            gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
           fi
 
       - name: Upload build files
