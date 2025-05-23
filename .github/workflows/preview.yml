@@ -7,6 +7,7 @@ on:
 env:
   PROJECT_ID: previewbuild
   BUCKET_NAME: previewbuild-pr-${{ github.event.pull_request.number }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
   setup-preview:
