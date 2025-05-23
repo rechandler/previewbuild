@@ -47,9 +47,10 @@ jobs:
         run: |
           # Create bucket if it doesn't exist
           if ! gsutil ls gs://${{ env.BUCKET_NAME }} 2>/dev/null; then
-            gsutil mb -l us-central1 gs://${{ env.BUCKET_NAME }}
-            gsutil web set -m index.html gs://${{ env.BUCKET_NAME }}
+            gsutil mb -p ${{ env.PROJECT_ID }} -l us-central1 gs://${{ env.BUCKET_NAME }}
+            gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
             gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
+            gcloud storage buckets update gs://${{ env.BUCKET_NAME }} --web-main-page-suffix=index.html --web-error-page=index.html
           fi
 
       - name: Upload build files
@@ -60,7 +61,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const previewUrl = `https://storage.googleapis.com/${{ env.BUCKET_NAME }}/index.html`;
+            const previewUrl = `https://storage.googleapis.com/${{ env.BUCKET_NAME }}`;
             const message = `🚀 Preview deployment for PR #${{ github.event.pull_request.number }} is ready!\n\n` +
                           `🔗 **Preview URL**: ${previewUrl}\n\n` +
                           `_This preview environment will be automatically deleted when the PR is closed._`;
