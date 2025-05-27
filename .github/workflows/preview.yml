@@ -44,24 +44,24 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      - name: Create and configure bucket
-        run: |
-          # Create bucket if it doesn't exist
-          if ! gsutil ls gs://${{ env.BUCKET_NAME }} 2>/dev/null; then
-            # Create a bucket for this PR if it doesn't exist
-            gsutil mb -p previewbuild -l us-central1 -b on gs://${{ env.BUCKET_NAME }} || true
-            # Make bucket publicly readable
-            gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
-            # Copy the built files to the bucket
-            gsutil -m cp -r dist/* gs://${{ env.BUCKET_NAME }}/
-            # Set the website configuration
-            echo '{"mainPageSuffix": "index.html", "notFoundPage": "index.html"}' > website.json
-            gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
-          fi
+      # - name: Create and configure bucket
+      #   run: |
+      #     # Create bucket if it doesn't exist
+      #     if ! gsutil ls gs://${{ env.BUCKET_NAME }} 2>/dev/null; then
+      #       # Create a bucket for this PR if it doesn't exist
+      #       gsutil mb -p previewbuild -l us-central1 -b on gs://${{ env.BUCKET_NAME }} || true
+      #       # Make bucket publicly readable
+      #       gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
+      #       # Copy the built files to the bucket
+      #       gsutil -m cp -r dist/* gs://${{ env.BUCKET_NAME }}/
+      #       # Set the website configuration
+      #       echo '{"mainPageSuffix": "index.html", "notFoundPage": "index.html"}' > website.json
+      #       gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
+      #     fi
 
       - name: Upload build files
         run: |
-          gcloud storage cp -r dist/* gs://${{ env.BUCKET_NAME }}
+          gcloud storage cp -r dist/* gs://${{ env.BUCKET_NAME }}/${{ github.event.pull_request.number }}
 
       - name: Comment on PR
         uses: actions/github-script@v6
